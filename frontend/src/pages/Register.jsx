@@ -19,7 +19,8 @@ export default function Register() {
   const [successMsg, setSuccessMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-
+  // Selecting adds to the end of the proficiency order; clicking a chip
+  // in "Your ranking" moves it up, matching the "arrange by proficiency" spec.
   const toggleCategory = (cat) => {
     if (rankedCategories.includes(cat)) {
       setRankedCategories(rankedCategories.filter(c => c !== cat));
@@ -120,15 +121,15 @@ export default function Register() {
         <form onSubmit={handleRegister} className="space-y-6 text-xs lg:text-sm">
           <div>
             <label className="block text-zinc-400 uppercase mb-2">Username</label>
-            <input type="text" placeholder="e.g., Alex" value={username} onChange={e => setUsername(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-4 text-white focus:outline-none focus:border-amber-400" />
+            <input type="text" placeholder="e.g., Alex" value={username} onChange={e => setUsername(e.target.value)} autoComplete="username" className="w-full bg-zinc-950 border border-zinc-800 p-4 text-white focus:outline-none focus:border-amber-400" />
           </div>
           <div>
             <label className="block text-zinc-400 uppercase mb-2">Email</label>
-            <input type="email" placeholder="name@domain.com" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-4 text-white focus:outline-none focus:border-amber-400" />
+            <input type="email" placeholder="name@domain.com" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" className="w-full bg-zinc-950 border border-zinc-800 p-4 text-white focus:outline-none focus:border-amber-400" />
           </div>
           <div>
             <label className="block text-zinc-400 uppercase mb-2">Password (min 6 characters)</label>
-            <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-4 text-white focus:outline-none focus:border-amber-400" />
+            <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password" className="w-full bg-zinc-950 border border-zinc-800 p-4 text-white focus:outline-none focus:border-amber-400" />
           </div>
 
           <div>

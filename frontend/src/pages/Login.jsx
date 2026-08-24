@@ -63,11 +63,11 @@ export default function Login() {
         <form onSubmit={handleLogin} className="space-y-6 text-xs lg:text-sm">
           <div>
             <label className="block text-zinc-400 uppercase mb-2">Email</label>
-            <input type="email" placeholder="name@domain.com" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-4 text-white focus:outline-none focus:border-amber-400" />
+            <input type="email" placeholder="name@domain.com" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" className="w-full bg-zinc-950 border border-zinc-800 p-4 text-white focus:outline-none focus:border-amber-400" />
           </div>
           <div>
             <label className="block text-zinc-400 uppercase mb-2">Password</label>
-            <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-4 text-white focus:outline-none focus:border-amber-400" />
+            <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" className="w-full bg-zinc-950 border border-zinc-800 p-4 text-white focus:outline-none focus:border-amber-400" />
           </div>
 
           <button type="submit" disabled={submitting} className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-zinc-950 py-4 font-bold uppercase tracking-wider transition text-sm">
