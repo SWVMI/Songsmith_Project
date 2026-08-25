@@ -11,6 +11,7 @@ const conversationSchema = new mongoose.Schema({
     default: 'Accepted',
   },
   lastMessageAt: { type: Date, default: Date.now },
+  hiddenBy: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], default: [] },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Conversation', conversationSchema);

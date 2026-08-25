@@ -28,6 +28,7 @@ const getConversations = async (req, res) => {
         { applicant: req.user.id },
         { creator: req.user.id },
       ],
+      hiddenBy: { $ne: req.user.id },
     })
       .sort({ lastMessageAt: -1 })
       .populate('post', 'title requiredCategory')
@@ -61,7 +62,6 @@ const getConversationById = async (req, res) => {
       });
     }
 
- 
     await conversation.populate([
       {
         path: 'post',
@@ -94,7 +94,6 @@ const getConversationById = async (req, res) => {
     });
   }
 };
-
 
 const sendMessage = async (req, res) => {
   try {
@@ -150,7 +149,6 @@ const sendMessage = async (req, res) => {
   }
 };
 
-
 const updateConversationStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -169,6 +167,7 @@ const updateConversationStatus = async (req, res) => {
       });
     }
 
+    // Only the post creator can change the contract status.
 if (conversation.creator.toString() !== req.user.id.toString()) {
   return res.status(403).json({
     message: 'Only the post creator can change the contract status.',
@@ -188,9 +187,52 @@ conversation.status = status;
   }
 };
 
+
+const setConversationHidden = async (req, res) => {
+  try {
+    const { hidden } = req.body;
+
+    const conversation = await Conversation.findById(req.params.id);
+
+    if (!conversation) {
+      return res.status(404).json({ message: 'Conversation not found.' });
+    }
+
+    if (!isParticipant(conversation, req.user.id)) {
+      return res.status(403).json({ message: 'You are not part of this conversation.' });
+    }
+
+    if (!CLOSED_STATUSES.includes(conversation.status)) {
+      return res.status(400).json({
+        message: 'Only completed, closed, or cancelled conversations can be removed from your list.',
+      });
+    }
+
+    if (hidden === false) {
+      conversation.hiddenBy = conversation.hiddenBy.filter(
+        (id) => id.toString() !== req.user.id.toString()
+      );
+    } else {
+      if (!conversation.hiddenBy.some((id) => id.toString() === req.user.id.toString())) {
+        conversation.hiddenBy.push(req.user.id);
+      }
+    }
+
+    await conversation.save();
+
+    res.status(200).json({ message: hidden === false ? 'Conversation restored.' : 'Conversation removed from your list.' });
+  } catch (err) {
+    res.status(500).json({
+      message: 'Failed to update conversation visibility.',
+      error: err.message,
+    });
+  }
+};
+
 module.exports = {
   getConversations,
   getConversationById,
   sendMessage,
   updateConversationStatus,
+  setConversationHidden,
 };

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquare, CheckCircle2, XCircle, Clock, Loader2 } from 'lucide-react';
+import { MessageSquare, CheckCircle2, XCircle, Clock, Loader2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
+
+const CLOSED_STATUSES = ['Completed', 'Closed', 'Cancelled'];
 
 export default function Contracts() {
   const [incoming, setIncoming] = useState([]);
@@ -10,6 +12,7 @@ export default function Contracts() {
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
+  const [convTab, setConvTab] = useState('active'); 
 
   const loadAll = () => {
     setLoading(true);
@@ -29,8 +32,11 @@ export default function Contracts() {
 
   useEffect(() => { loadAll(); }, []);
 
-
   const activeIncoming = incoming.filter(app => !(app.status === 'Rejected' && app.post?.status === 'Closed'));
+
+  const activeConversations = conversations.filter(c => !CLOSED_STATUSES.includes(c.status));
+  const archivedConversations = conversations.filter(c => CLOSED_STATUSES.includes(c.status));
+  const visibleConversations = convTab === 'active' ? activeConversations : archivedConversations;
 
   const handleReview = async (id, status) => {
     try {
@@ -44,6 +50,18 @@ export default function Contracts() {
       loadAll();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to update this application.');
+    }
+  };
+
+  const handleRemoveConversation = async (id, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await API.patch(`/conversations/${id}/hide`, { hidden: true });
+      setConversations(prev => prev.filter(c => c._id !== id));
+      toast('Removed from your list.');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to remove this conversation.');
     }
   };
 
@@ -127,22 +145,54 @@ export default function Contracts() {
         </div>
 
         <div className="lg:col-span-6 bg-zinc-900 border border-zinc-800 p-6">
-          <h3 className="text-sm font-bold text-white uppercase mb-4 tracking-wider text-amber-400">Active Conversations</h3>
-          {conversations.length === 0 ? (
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider text-amber-400">Conversations</h3>
+            <div className="flex border border-zinc-800">
+              <button
+                onClick={() => setConvTab('active')}
+                className={`px-3 py-1.5 text-[10px] uppercase font-bold transition ${convTab === 'active' ? 'bg-amber-400 text-zinc-950' : 'text-zinc-400 hover:text-amber-400'}`}
+              >
+                Active {activeConversations.length > 0 && `(${activeConversations.length})`}
+              </button>
+              <button
+                onClick={() => setConvTab('archived')}
+                className={`px-3 py-1.5 text-[10px] uppercase font-bold transition ${convTab === 'archived' ? 'bg-amber-400 text-zinc-950' : 'text-zinc-400 hover:text-amber-400'}`}
+              >
+                Archived {archivedConversations.length > 0 && `(${archivedConversations.length})`}
+              </button>
+            </div>
+          </div>
+
+          {visibleConversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-center py-16 text-zinc-600 space-y-2">
               <MessageSquare className="w-8 h-8 opacity-40" />
-              <p className="uppercase tracking-widest text-[11px]">No active DMs.</p>
-              <p className="text-[10px] text-zinc-500 max-w-xs">A DM opens automatically once an application is accepted.</p>
+              <p className="uppercase tracking-widest text-[11px]">
+                {convTab === 'active' ? 'No active DMs.' : 'No archived conversations.'}
+              </p>
+              <p className="text-[10px] text-zinc-500 max-w-xs">
+                {convTab === 'active'
+                  ? 'A DM opens automatically once an application is accepted.'
+                  : 'Conversations move here once marked Completed, Closed, or Cancelled.'}
+              </p>
             </div>
           ) : (
             <div className="space-y-3">
-              {conversations.map(c => (
-                <Link key={c._id} to={`/contracts/${c._id}`} className="block bg-zinc-950 border border-zinc-800 hover:border-amber-400/40 p-4 transition">
-                  <div className="flex justify-between items-center mb-1">
+              {visibleConversations.map(c => (
+                <Link key={c._id} to={`/contracts/${c._id}`} className="block bg-zinc-950 border border-zinc-800 hover:border-amber-400/40 p-4 transition relative group">
+                  <div className="flex justify-between items-center mb-1 pr-6">
                     <span className="text-amber-300 font-bold">{c.post?.title}</span>
                     <span className="text-[10px] text-zinc-500 uppercase">{c.status}</span>
                   </div>
                   <p className="text-zinc-500 text-[10px]">Owner: {c.creator?.username} · Applicant: {c.applicant?.username}</p>
+                  {convTab === 'archived' && (
+                    <button
+                      onClick={(e) => handleRemoveConversation(c._id, e)}
+                      title="Remove from your list"
+                      className="absolute top-3 right-3 text-zinc-600 hover:text-rose-400 transition opacity-0 group-hover:opacity-100"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
                 </Link>
               ))}
             </div>

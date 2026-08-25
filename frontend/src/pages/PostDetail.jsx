@@ -106,8 +106,11 @@ export default function PostDetail() {
         <span className="bg-zinc-950 border border-zinc-800 text-amber-400 px-2.5 py-1 text-[10px] uppercase inline-block mb-4">
           Needed: {post.requiredCategory}
         </span>
-        <h2 className="text-3xl font-black text-white uppercase tracking-tight mb-2">{post.title}</h2>
-        <p className="text-zinc-500 mb-6">Posted by {post.creator?.username || 'Unknown'}</p>
+                <h2 className="text-3xl font-black text-white uppercase tracking-tight mb-2">{post.title}</h2>
+        <p className="text-zinc-500 mb-1">Posted by {post.creator?.username || 'Unknown'}</p>
+        <p className="text-zinc-600 text-[11px] mb-6">
+          {new Date(post.createdAt).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+        </p>
         <p className="text-zinc-300 leading-relaxed whitespace-pre-wrap mb-4">{post.description}</p>
         {post.additionalRequirements && (
           <p className="text-zinc-400 leading-relaxed whitespace-pre-wrap border-t border-zinc-800 pt-4 mt-4">

@@ -6,8 +6,21 @@ const populateCreator = (query) => query.populate('creator', 'username categorie
 
 const getPosts = async (req, res) => {
   try {
+    const { category, q } = req.query;
+    const filter = { status: 'Open' };
+
+    if (category && category.trim()) {
+      filter.requiredCategory = category.trim();
+    }
+
+    if (q && q.trim()) {
+      const escaped = q.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escaped, 'i');
+      filter.$or = [{ title: regex }, { description: regex }];
+    }
+
     const posts = await populateCreator(
-      Post.find({ status: 'Open' }).sort({ createdAt: -1 })
+      Post.find(filter).sort({ createdAt: -1 })
     );
 
     res.status(200).json(posts);
@@ -128,6 +141,7 @@ const deletePost = async (req, res) => {
     res.status(500).json({ message: 'Failed to delete post.', error: err.message });
   }
 };
+
 
 const closePost = async (req, res) => {
   try {
