@@ -3,7 +3,7 @@ const router = express.Router();
 const { getPosts, getPostById, createPost, updatePost, deletePost, closePost } = require('../controllers/postController');
 const { protect } = require('../middleware/authMiddleware');
 
-router.use(protect); // Explore + posting is authenticated-only per spec
+router.use(protect); 
 
 router.get('/', getPosts);
 router.post('/', createPost);

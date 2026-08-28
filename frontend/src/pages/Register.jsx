@@ -19,8 +19,6 @@ export default function Register() {
   const [successMsg, setSuccessMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Selecting adds to the end of the proficiency order; clicking a chip
-  // in "Your ranking" moves it up, matching the "arrange by proficiency" spec.
   const toggleCategory = (cat) => {
     if (rankedCategories.includes(cat)) {
       setRankedCategories(rankedCategories.filter(c => c !== cat));
